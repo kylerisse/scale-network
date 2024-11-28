@@ -126,7 +126,7 @@ def test_switchconfigs_tsv():
                 ds.isuntested,
             ],
         }
-        result, err = ds.test_tsvfile(meta)
+        result, err = ds.test_multline_tsvfile(meta)
         assert result, err
 
 

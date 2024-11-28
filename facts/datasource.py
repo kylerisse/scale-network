@@ -182,7 +182,12 @@ def test_tsvfile(meta):
     return test_datafile(r"\t+", meta)
 
 
-def test_datafile(delimiter, meta):
+def test_multline_tsvfile(meta):
+    """multiline tsv wrappper for test_datafile"""
+    return test_datafile(r"\t", meta, multiline=True)
+
+
+def test_datafile(delimiter, meta, multiline=False):
     """
     test a file using the supplied delimiter and metadata
     structured as:
@@ -194,6 +199,16 @@ def test_datafile(delimiter, meta):
                 corresponding column index.
     }
     """
+    with open(meta["file"], encoding="utf-8") as fha:
+        lines = fha.readlines()
+    if multiline:
+        merged_lines = merge_continuation_lines(lines)
+        return test_datafile_lines(merged_lines, delimiter, meta)
+    return test_datafile_lines(lines, delimiter, meta)
+
+
+def test_datafile_lines(lines, delimiter, meta):
+    """test the individual lines of the datafile"""
     with open(meta["file"], encoding="utf-8") as fha:
         lines = fha.readlines()
     for linenum, line in enumerate(lines):
@@ -220,10 +235,29 @@ def test_datafile(delimiter, meta):
             continue
         # run the validators for each column
         for i, val in enumerate(elems):
-            if val.startswith("//"):
+            if val.startswith("//")or val.startswith("RSRVD"):
                 continue
             if not meta["cols"][i](val.rstrip("\n")):
                 return False, "invalid field " + val + " failed " + meta["cols"][
                     i
                 ].__name__ + " at line " + str(linenum + 1) + " of " + meta["file"]
     return True, ""
+
+
+def merge_continuation_lines(lines):
+    """merge multiline content into single based on delimiter"""
+    merged_lines = []
+    continuation_line = ""
+    for line in lines:
+        clean_line = line.rstrip("\n").lstrip("\t")
+        if clean_line.endswith("\\"):
+            stripped_line = clean_line.rstrip(" \\")
+            if stripped_line.endswith(","):
+                continuation_line = f"{continuation_line}{stripped_line[:-1]}"
+            else:
+                continuation_line = f"{continuation_line},{stripped_line}"
+        else:
+            continuation_line = f"{continuation_line}{clean_line}"
+            merged_lines.append(continuation_line)
+            continuation_line = ""
+    return merged_lines
