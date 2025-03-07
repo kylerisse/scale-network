@@ -45,7 +45,7 @@ in
     };
     nginxFQDN = mkOption {
       type = types.str;
-      default = "coreconf.scale.lan";
+      default = "mrtg.scale.lan";
       description = "Publicly facing domain name used to access grafana from a browser";
     };
   };
@@ -137,7 +137,7 @@ in
           services.nginx.enable = mkDefault true;
           services.nginx.virtualHosts."${cfg.nginxFQDN}" = {
             default = false;
-            root = "${cfg.statePath}";
+            root = "${cfg.statePath}/graphs";
             locations."/" = {
               extraConfig = ''
                 autoindex on;

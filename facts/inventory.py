@@ -353,6 +353,7 @@ def serveralias(name):
                 "coremaster",
                 "loghost",
                 "monitoring",
+                "mrtg",
                 "ntpconf",
                 "signs",
             ]
