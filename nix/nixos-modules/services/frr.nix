@@ -56,6 +56,7 @@ in
          passive-interface default
          redistribute connected
          redistribute static
+         network 2001:470:f026::/48 area 0
         exit
       '';
     };
@@ -69,6 +70,11 @@ in
       ospfd.enable = true;
       ospfd.options = [
         "-A 127.0.0.1 -M snmp"
+      ];
+
+      ospf6d.enable = true;
+      ospf6d.options = [
+        "-A ::1"
       ];
 
       config =
